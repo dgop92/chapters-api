@@ -12,15 +12,15 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "outDir": "dist",
-    "baseUrl": ".",
+    "baseUrl": "./src",
     "rootDir": "src",
     "paths": {
-      "*": [
-        "node_modules/*",
+      "@db/*": [
+        "db/*"
       ]
     }
   },
   "include": [
     "./src/"
-  ],
+  ]
 }
