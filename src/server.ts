@@ -2,6 +2,8 @@ import express from "express";
 import morgan from "morgan";
 import config from "./config/index";
 import { disconnect } from "@db/db";
+import authRouter from "./apps/auth/routes";
+import { handleUnauthorizedError } from "./apps/auth/customErrors";
 
 // import cors from 'cors'
 
@@ -16,6 +18,9 @@ app.use(morgan("dev"));
 app.get("/api", (req, res) => {
   res.send("Hello World 2! " + process.env.NODE_ENV);
 });
+
+app.use("/auth", authRouter);
+app.use(handleUnauthorizedError);
 
 export const start = async () => {
   try {

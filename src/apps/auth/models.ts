@@ -1,9 +1,9 @@
-import Joi from "joi";
 import bcrypt from "bcrypt";
-import { getInsertQuery } from "@db/crudQueries";
+import { getDetailQuery, getInsertQuery } from "@db/crudQueries";
 import db from "@db/db";
-import { IntegrityConstraintViolationError } from "slonik";
+import { IntegrityConstraintViolationError, NotFoundError, sql } from "slonik";
 import { ModelError } from "@db/customErrors";
+import { AuthError } from "./customErrors";
 
 export type User = {
   username: string;
@@ -11,14 +11,15 @@ export type User = {
   password: string;
 };
 
+export type ResponseUser = User & {
+  pk: number;
+  is_admin: boolean;
+};
+
+const LOGIN_ERROR = "Could not login with the provided credentials";
+
 export class UserModel {
   tableName = "user";
-
-  schema = Joi.object({
-    username: Joi.string().min(3).max(45).required(),
-    email: Joi.string().email().required(),
-    password: Joi.string().min(10).max(30).required(),
-  });
 
   integrityErrors = {
     unique_username: "a user with this username already exists",
@@ -38,12 +39,40 @@ export class UserModel {
     try {
       const query = getInsertQuery(newData, this.tableName);
       const res = await db.query(query);
-      return res.rows[0];
+      return res.rows[0] as ResponseUser;
     } catch (error) {
       if (error instanceof IntegrityConstraintViolationError) {
         throw new ModelError(this.integrityErrors, error);
       }
       throw error;
     }
+  }
+
+  async login(username: string, password: string) {
+    const lookupQuery = sql`WHERE username=${username}`;
+
+    try {
+      const user = (await db.one(
+        sql`SELECT * FROM "user" ${lookupQuery}`
+      )) as ResponseUser;
+      const arePasswordEqual = await bcrypt.compare(password, user.password);
+
+      if (!arePasswordEqual) {
+        throw new AuthError(LOGIN_ERROR);
+      }
+      return user;
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        // generic error, in order to not reveal what username already exists in db
+        throw new AuthError(LOGIN_ERROR);
+      }
+      throw error;
+    }
+  }
+
+  async getAuthenticatedUser(pk: number) {
+    const query = getDetailQuery(this.tableName, { field: "pk", value: pk });
+    const res = await db.one(query);
+    return res as ResponseUser;
   }
 }

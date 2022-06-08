@@ -10,7 +10,7 @@ if (config.isTest) {
   };
 } */
 
-const pool = createPool(config.db_url);
+const pool = createPool(config.dbUrl);
 
 export const disconnect = () => {
   try {

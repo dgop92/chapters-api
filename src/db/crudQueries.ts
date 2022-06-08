@@ -1,16 +1,8 @@
 import { sql } from "slonik";
+import { getSimplePkLookupQuery, SimplePkLookup } from "./genericQueries";
 
 type CleanData = {
   [key: string]: any;
-};
-
-type SimplePkLookup = {
-  field: string;
-  value: number;
-};
-
-const getSimplePkLookupQuery = (lookUpData: SimplePkLookup) => {
-  return sql`WHERE ${sql.identifier([lookUpData.field])}=${lookUpData.value}`;
 };
 
 export const getInsertQuery = (cleanData: CleanData, modelName: string) => {

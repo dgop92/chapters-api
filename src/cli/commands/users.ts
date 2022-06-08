@@ -1,11 +1,12 @@
 import { ModelError } from "@db/customErrors";
 import { disconnect } from "@db/db";
+import { userSchema } from "apps/auth/schemas";
 import { UserModel, User } from "../../apps/auth/models";
 
 export async function createSuperUser(user: User) {
   const userModel = new UserModel();
 
-  const { error, value: cleanData } = userModel.schema.validate(user);
+  const { error, value: cleanData } = userSchema.validate(user);
 
   if (error) {
     console.log(error);
