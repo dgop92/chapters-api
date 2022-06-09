@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "ts-node-dev -r tsconfig-paths/register -r dotenv/config --respawn src/index.ts",
     "start": "node -r ./prod-paths.js -r dotenv/config dist/index.js",
-    "test": "mocha 'src/**/*.spec.ts' -r ts-node/register -r tsconfig-paths/register -r dotenv/config dotenv_config_path=./.env.test",
+    "test": "mocha 'src/**/*.spec.ts' -r ts-node/register -r tsconfig-paths/register -r dotenv/config dotenv_config_path=./.env.test -r ./src/testsUtils/rootHooks.ts -r ./src/testsUtils/loadChaiPlugins.ts",
+    "test-db": "mocha 'src/**/*.db.spec.ts' -r ts-node/register -r tsconfig-paths/register -r dotenv/config dotenv_config_path=./.env.test -r ./src/testsUtils/rootHooks.ts -r ./src/testsUtils/loadChaiPlugins.ts",
+    "test-simple": "mocha 'src/**/*.simple.spec.ts' -r ts-node/register -r tsconfig-paths/register -r dotenv/config dotenv_config_path=./.env.test -r ./src/testsUtils/loadChaiPlugins.ts",
     "build": "npx tsc",
     "run-with-ts-node": "ts-node -r tsconfig-paths/register -r dotenv/config src/index.ts",
     "admin-cli": "ts-node -r tsconfig-paths/register -r dotenv/config src/cli/admin.js"
@@ -29,6 +31,7 @@
     "@types/bcrypt": "5.0.0",
     "@types/body-parser": "1.19.2",
     "@types/chai": "^4.3.1",
+    "@types/chai-as-promised": "^7.1.5",
     "@types/express": "4.17.13",
     "@types/jsonwebtoken": "8.5.8",
     "@types/mocha": "^9.1.1",
@@ -36,6 +39,7 @@
     "@types/node": "17.0.39",
     "@types/pg": "^8.6.5",
     "chai": "4.3.6",
+    "chai-as-promised": "^7.1.1",
     "mocha": "10.0.0",
     "ts-node": "10.8.1",
     "ts-node-dev": "^2.0.0",

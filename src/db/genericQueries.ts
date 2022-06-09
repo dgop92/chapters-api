@@ -1,15 +1,15 @@
 import { QueryResultRow, sql, TaggedTemplateLiteralInvocation } from "slonik";
 
-export type SimplePkLookup = {
+export type SimpleLookup = {
   field: string;
-  value: number;
+  value: number | string | boolean;
 };
 
-export const getSimplePkLookupQuery = (lookUpData: SimplePkLookup) => {
+export const getSimpleLookupQuery = (lookUpData: SimpleLookup) => {
   return sql`WHERE ${sql.identifier([lookUpData.field])}=${lookUpData.value}`;
 };
 
-export async function getExitsQuery(
+export function getExitsQuery(
   modelName: string,
   lookupQuery: TaggedTemplateLiteralInvocation<QueryResultRow>
 ) {

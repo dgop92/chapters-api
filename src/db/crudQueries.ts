@@ -1,5 +1,5 @@
 import { sql } from "slonik";
-import { getSimplePkLookupQuery, SimplePkLookup } from "./genericQueries";
+import { getSimpleLookupQuery, SimpleLookup } from "./genericQueries";
 
 type CleanData = {
   [key: string]: any;
@@ -21,11 +21,8 @@ export const getInsertQuery = (cleanData: CleanData, modelName: string) => {
   return q;
 };
 
-export const getDetailQuery = (
-  modelName: string,
-  lookUpData: SimplePkLookup
-) => {
-  const lookupQuery = getSimplePkLookupQuery(lookUpData);
+export const getDetailQuery = (modelName: string, lookUpData: SimpleLookup) => {
+  const lookupQuery = getSimpleLookupQuery(lookUpData);
   return sql`SELECT * FROM ${sql.identifier([modelName])} ${lookupQuery}`;
 };
 
@@ -36,14 +33,14 @@ const getUpdatePair = (columnName: string, value: any) => {
 export const getUpdateQuery = (
   cleanData: CleanData,
   modelName: string,
-  lookUpData: SimplePkLookup
+  lookUpData: SimpleLookup
 ) => {
   const dataEntries = Object.entries(cleanData);
   const columnValuesPairs = dataEntries.map((entry) =>
     getUpdatePair(entry[0], entry[1])
   );
   const setIdentifiers = sql.join(columnValuesPairs, sql`,`);
-  const lookupQuery = getSimplePkLookupQuery(lookUpData);
+  const lookupQuery = getSimpleLookupQuery(lookUpData);
 
   const updateQuery = sql`UPDATE ${sql.identifier([
     modelName,
@@ -52,11 +49,8 @@ export const getUpdateQuery = (
   return sql`${updateQuery} ${lookupQuery} RETURNING *`;
 };
 
-export const getDeleteQuery = (
-  modelName: string,
-  lookUpData: SimplePkLookup
-) => {
-  const lookupQuery = getSimplePkLookupQuery(lookUpData);
+export const getDeleteQuery = (modelName: string, lookUpData: SimpleLookup) => {
+  const lookupQuery = getSimpleLookupQuery(lookUpData);
   return sql`DELETE FROM ${sql.identifier([modelName])} ${lookupQuery}`;
 };
 
