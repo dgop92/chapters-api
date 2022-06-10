@@ -30,3 +30,18 @@ export class ModelError extends Error {
     };
   }
 }
+
+export class ResourceNotFoundError extends Error {
+  constructor(modelName: string) {
+    super(`${modelName} was not found`);
+  }
+
+  get details() {
+    return {
+      errorType: "not-found",
+      errorData: {
+        message: this.message,
+      },
+    };
+  }
+}

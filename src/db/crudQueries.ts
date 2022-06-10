@@ -1,9 +1,6 @@
 import { sql } from "slonik";
-import { getSimpleLookupQuery, SimpleLookup } from "./genericQueries";
-
-type CleanData = {
-  [key: string]: any;
-};
+import { getSimpleLookupQuery } from "./genericQueries";
+import { CleanData, SimpleLookup } from "./types";
 
 export const getInsertQuery = (cleanData: CleanData, modelName: string) => {
   const dataEntries = Object.entries(cleanData);

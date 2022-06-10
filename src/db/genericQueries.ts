@@ -1,9 +1,5 @@
 import { QueryResultRow, sql, TaggedTemplateLiteralInvocation } from "slonik";
-
-export type SimpleLookup = {
-  field: string;
-  value: number | string | boolean;
-};
+import { SimpleLookup } from "./types";
 
 export const getSimpleLookupQuery = (lookUpData: SimpleLookup) => {
   return sql`WHERE ${sql.identifier([lookUpData.field])}=${lookUpData.value}`;

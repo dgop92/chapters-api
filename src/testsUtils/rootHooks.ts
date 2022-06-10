@@ -13,7 +13,6 @@ export const mochaHooks = {
     const res = (await db.many(getAllTablesQuery)) as Array<{
       table_name: string;
     }>;
-    console.log("Before each");
     const tableNames = res.map((e) => sql.identifier([e.table_name]));
     const truncateQuery = sql`TRUNCATE ${sql.join(tableNames, sql`, `)}`;
     await db.query(truncateQuery);
