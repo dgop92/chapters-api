@@ -2,7 +2,7 @@ import express from "express";
 import morgan from "morgan";
 import config from "./config/index";
 import { disconnect } from "@db/db";
-import authRouter from "./apps/auth/routes";
+import { authRouter, usersRouter } from "./apps/auth/routes";
 import chapterRouter from "./apps/core/chapters/chapter.routes";
 import { handleUnauthorizedError } from "./apps/auth/customErrors";
 
@@ -21,6 +21,7 @@ app.get("/api", (req, res) => {
 });
 
 app.use("/api/auth", authRouter);
+app.use("/api/users", usersRouter);
 app.use("/api/chapter", chapterRouter);
 app.use(handleUnauthorizedError);
 

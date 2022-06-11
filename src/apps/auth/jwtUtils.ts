@@ -1,9 +1,18 @@
 import config from "config";
 import jwt from "jsonwebtoken";
-import { ResponseUser } from "./models";
+import { User } from "./models";
 
-export const getJwtToken = (user: ResponseUser) => {
-  return jwt.sign({ pk: user.pk }, config.jwtSecret, {
-    expiresIn: config.jwtExp,
-  });
+export const getJwtToken = (user: User) => {
+  return jwt.sign(
+    {
+      pk: user.pk,
+      is_admin: user.is_admin,
+      username: user.username,
+      email: user.email,
+    },
+    config.jwtSecret,
+    {
+      expiresIn: config.jwtExp,
+    }
+  );
 };

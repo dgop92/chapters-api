@@ -17,6 +17,7 @@ export const createOne =
       if (err instanceof ValidationError || err instanceof ModelError) {
         return res.status(400).json(err.details);
       }
+      throw err;
     }
   };
 
@@ -36,6 +37,7 @@ export const updateOne =
       if (err instanceof ResourceNotFoundError) {
         return res.status(404).json(err.details);
       }
+      throw err;
     }
   };
 
@@ -50,6 +52,7 @@ export const getOne =
       if (err instanceof ResourceNotFoundError) {
         return res.status(404).json(err.details);
       }
+      throw err;
     }
   };
 
@@ -64,5 +67,6 @@ export const deleteOne =
       if (err instanceof ResourceNotFoundError) {
         return res.status(404).json(err.details);
       }
+      throw err;
     }
   };

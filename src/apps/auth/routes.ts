@@ -1,10 +1,19 @@
 import { Router } from "express";
-import { signin, me } from "./controllers";
+import { signin, me, myProfile, updateProfile } from "./controllers";
 import { protectedEndpoint } from "./middlewares";
 
-const router = Router();
+const authRouter = Router();
+const usersRouter = Router();
 
-router.route("/login").post(signin);
-router.route("/me").get(protectedEndpoint(), me);
+// may in the future add reset password, change password
+authRouter.route("/jwt/create").post(signin);
 
-export default router;
+usersRouter.use(protectedEndpoint());
+usersRouter.route("/me").get(me);
+usersRouter
+  .route("/profile")
+  .get(myProfile)
+  .put(updateProfile)
+  .patch(updateProfile);
+
+export { authRouter, usersRouter };

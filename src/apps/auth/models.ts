@@ -1,18 +1,22 @@
 import bcrypt from "bcrypt";
-import { getDetailQuery, getInsertQuery } from "@db/crudQueries";
+import {
+  getDetailQuery,
+  getInsertQuery,
+  getUpdateQuery,
+} from "@db/crudQueries";
 import db from "@db/db";
 import { IntegrityConstraintViolationError, NotFoundError, sql } from "slonik";
 import { ModelError } from "@db/customErrors";
 import { AuthError } from "./customErrors";
+import { CleanData } from "@db/types";
+import { checkResourceExists } from "@db/genericOperations";
+import Joi from "joi";
 
 export type User = {
+  pk: number;
   username: string;
   email: string;
   password: string;
-};
-
-export type ResponseUser = User & {
-  pk: number;
   is_admin: boolean;
 };
 
@@ -27,7 +31,7 @@ export class UserModel {
   };
 
   // Expected to be created in a console
-  async create(cleanData: User, isAdmin = false) {
+  async create(cleanData: CleanData, isAdmin = false) {
     const hashedPassword = await bcrypt.hash(cleanData.password, 8);
 
     const newData = {
@@ -39,7 +43,7 @@ export class UserModel {
     try {
       const query = getInsertQuery(newData, this.tableName);
       const res = await db.query(query);
-      return res.rows[0] as ResponseUser;
+      return res.rows[0] as User;
     } catch (error) {
       if (error instanceof IntegrityConstraintViolationError) {
         throw new ModelError(this.integrityErrors, error);
@@ -54,7 +58,7 @@ export class UserModel {
     try {
       const user = (await db.one(
         sql`SELECT * FROM "user" ${lookupQuery}`
-      )) as ResponseUser;
+      )) as User;
       const arePasswordEqual = await bcrypt.compare(password, user.password);
 
       if (!arePasswordEqual) {
@@ -73,6 +77,66 @@ export class UserModel {
   async getAuthenticatedUser(pk: number) {
     const query = getDetailQuery(this.tableName, { field: "pk", value: pk });
     const res = await db.one(query);
-    return res as ResponseUser;
+    return res as User;
+  }
+}
+
+type Profile = {
+  pk: number;
+  first_name: string;
+  last_name: string;
+  student_code: string;
+  career: string;
+  user_id: number;
+};
+
+const profilePartialUpdateSchema = Joi.object<CleanData>({
+  first_name: Joi.string().max(150),
+  last_name: Joi.string().max(150),
+  career: Joi.string().max(90),
+  student_code: Joi.string().max(14),
+});
+
+export class ProfileModel {
+  tableName = "profile";
+
+  partialUpdateSchema = profilePartialUpdateSchema;
+  createUpdateSchema = profilePartialUpdateSchema
+    .options({ presence: "required" })
+    .required();
+
+  // cleanData contains user_id
+  async create(cleanData: CleanData, user_id: number) {
+    const query = getInsertQuery({ ...cleanData, user_id }, this.tableName);
+    const res = await db.one(query);
+    return res as Profile;
+  }
+
+  async getAuthenticatedProfile(user_id: number) {
+    await checkResourceExists(this.tableName, {
+      field: "user_id",
+      value: user_id,
+    });
+
+    const query = getDetailQuery(this.tableName, {
+      field: "user_id",
+      value: user_id,
+    });
+    const res = await db.one(query);
+    return res as Profile;
+  }
+
+  async update(cleanData: CleanData, user_id: number) {
+    await checkResourceExists(this.tableName, {
+      field: "user_id",
+      value: user_id,
+    });
+
+    const query = getUpdateQuery(cleanData, this.tableName, {
+      field: "user_id",
+      value: user_id,
+    });
+    const res = await db.one(query);
+    return res as Profile;
   }
 }
