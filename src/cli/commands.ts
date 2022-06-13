@@ -1,7 +1,9 @@
 import { ModelError } from "@db/customErrors";
 import { disconnect } from "@db/db";
 import { userSchema } from "apps/auth/schemas";
-import { UserModel, User, ProfileModel } from "../../apps/auth/models";
+import { UniqueIntegrityConstraintViolationError } from "slonik";
+import { UserModel, User, ProfileModel } from "../apps/auth/models";
+import { createRole } from "../apps/core/role/role.utilities";
 
 export async function createSuperUser(user: User) {
   const userModel = new UserModel();
@@ -36,4 +38,22 @@ export async function createSuperUser(user: User) {
       }
     }
   }
+}
+
+async function createRoleUtil(rolename: string) {
+  try {
+    const role = await createRole(rolename);
+    console.log(role);
+  } catch (error) {
+    if (error instanceof UniqueIntegrityConstraintViolationError) {
+      console.log(`This role '${rolename}' has already been created`);
+    }
+  }
+}
+
+export async function createBasicRoles() {
+  await createRoleUtil("member");
+  await createRoleUtil("executive");
+  console.log("Roles created successfully");
+  disconnect();
 }

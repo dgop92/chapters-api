@@ -11,6 +11,7 @@ import { AuthError } from "./customErrors";
 import { CleanData } from "@db/types";
 import { checkResourceExists } from "@db/genericOperations";
 import Joi from "joi";
+import { profileSchemaProperties } from "./schemas";
 
 export type User = {
   pk: number;
@@ -47,6 +48,23 @@ export class UserModel {
     } catch (error) {
       if (error instanceof IntegrityConstraintViolationError) {
         throw new ModelError(this.integrityErrors, error);
+      }
+      throw error;
+    }
+  }
+
+  async getOrCreate(cleanData: CleanData) {
+    const lookupQuery = sql`WHERE username=${cleanData.username}`;
+
+    try {
+      const user = (await db.one(
+        sql`SELECT * FROM "user" ${lookupQuery}`
+      )) as User;
+      return { created: false, user };
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        const createdUser = await this.create(cleanData);
+        return { created: true, user: createdUser };
       }
       throw error;
     }
@@ -90,18 +108,11 @@ type Profile = {
   user_id: number;
 };
 
-const profilePartialUpdateSchema = Joi.object<CleanData>({
-  first_name: Joi.string().max(150),
-  last_name: Joi.string().max(150),
-  career: Joi.string().max(90),
-  student_code: Joi.string().max(14),
-});
-
 export class ProfileModel {
   tableName = "profile";
 
-  partialUpdateSchema = profilePartialUpdateSchema;
-  createUpdateSchema = profilePartialUpdateSchema
+  partialUpdateSchema = Joi.object<CleanData>(profileSchemaProperties);
+  createUpdateSchema = Joi.object<CleanData>(profileSchemaProperties)
     .options({ presence: "required" })
     .required();
 

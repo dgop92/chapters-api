@@ -1,5 +1,5 @@
 import { Command } from "commander";
-import { createSuperUser } from "./commands/users";
+import { createSuperUser, createBasicRoles } from "./commands";
 const program = new Command();
 
 program
@@ -11,5 +11,12 @@ program
     const user = { username, email, password };
     await createSuperUser(user);
   });
+
+program
+  .command("create-roles")
+  .description(
+    "create the necessary student roles for the application to work correctly"
+  )
+  .action(createBasicRoles);
 
 program.parseAsync();

@@ -4,6 +4,7 @@ import config from "./config/index";
 import { disconnect } from "@db/db";
 import { authRouter, usersRouter } from "./apps/auth/routes";
 import chapterRouter from "./apps/core/chapters/chapter.routes";
+import studentRouter from "./apps/core/students/student.routes";
 import { handleUnauthorizedError } from "./apps/auth/customErrors";
 
 // import cors from 'cors'
@@ -23,6 +24,7 @@ app.get("/api", (req, res) => {
 app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/chapter", chapterRouter);
+app.use("/api/students", studentRouter);
 app.use(handleUnauthorizedError);
 
 export const start = async () => {
