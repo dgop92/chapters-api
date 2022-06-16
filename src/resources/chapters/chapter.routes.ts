@@ -1,4 +1,4 @@
-import { validateLookUpField } from "apps/common/middlewares";
+import { validateLookUpField } from "common/middlewares";
 import { Router } from "express";
 import { chapterControllers } from "./chapter.controller";
 

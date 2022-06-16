@@ -1,9 +1,9 @@
 import { ModelError } from "@db/customErrors";
 import { disconnect } from "@db/db";
-import { userSchema } from "apps/auth/schemas";
+import { userSchema } from "auth/schemas";
 import { UniqueIntegrityConstraintViolationError } from "slonik";
-import { UserModel, User, ProfileModel } from "../apps/auth/models";
-import { createRole } from "../apps/core/role/role.utilities";
+import { UserModel, User, ProfileModel } from "../auth/models";
+import { createRole } from "../resources/role/role.utilities";
 
 export async function createSuperUser(user: User) {
   const userModel = new UserModel();

@@ -2,10 +2,10 @@ import express from "express";
 import morgan from "morgan";
 import config from "./config/index";
 import { disconnect } from "@db/db";
-import { authRouter, usersRouter } from "./apps/auth/routes";
-import chapterRouter from "./apps/core/chapters/chapter.routes";
-import studentRouter from "./apps/core/students/student.routes";
-import { handleUnauthorizedError } from "./apps/auth/customErrors";
+import { authRouter, usersRouter } from "./auth/routes";
+import chapterRouter from "./resources/chapters/chapter.routes";
+import studentRouter from "./resources/students/student.routes";
+import { handleUnauthorizedError } from "./auth/customErrors";
 
 // import cors from 'cors'
 

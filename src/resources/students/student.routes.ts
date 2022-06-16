@@ -1,4 +1,4 @@
-import { singleParamValidation } from "apps/common/middlewares";
+import { singleParamValidation } from "common/middlewares";
 import { Router } from "express";
 import Joi from "joi";
 import { registerStudent } from "./student.controller";

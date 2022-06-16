@@ -1,11 +1,8 @@
 import Joi from "joi";
 import db from "@db/db";
 import { CleanData } from "@db/types";
-import { ProfileModel, UserModel } from "apps/auth/models";
-import {
-  profileSchemaProperties,
-  userSchemaPropertites,
-} from "apps/auth/schemas";
+import { ProfileModel, UserModel } from "auth/models";
+import { profileSchemaProperties, userSchemaPropertites } from "auth/schemas";
 import { generate } from "generate-password";
 import { getRole } from "../role/role.utilities";
 import { getInsertQuery } from "@db/crudQueries";

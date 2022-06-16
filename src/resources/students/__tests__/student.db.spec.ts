@@ -1,8 +1,8 @@
 import { expect } from "chai";
 import { StudentModel } from "../student.model";
 import { checkResourceExists } from "@db/genericOperations";
-import { ChapterModel } from "apps/core/chapters/chapter.model";
-import { createRole } from "apps/core/role/role.utilities";
+import { ChapterModel } from "resources/chapters/chapter.model";
+import { createRole } from "resources/role/role.utilities";
 
 const chapterData = {
   name: "ACM",
