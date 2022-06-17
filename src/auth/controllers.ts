@@ -7,15 +7,12 @@ import { Request as JWTRequest } from "express-jwt";
 import { ValidationError } from "joi";
 import { ResourceNotFoundError } from "@db/customErrors";
 
-const userModel = new UserModel();
-const profileModel = new ProfileModel();
-
 export const signin = async (req: Request, res: Response) => {
   try {
     const cleanData = await loginSchema.validateAsync(req.body, {
       abortEarly: false,
     });
-    const user = await userModel.login(cleanData.username, cleanData.password);
+    const user = await UserModel.login(cleanData.username, cleanData.password);
     const token = getJwtToken(user);
     return res.status(200).json({ access: token });
   } catch (error) {
@@ -29,7 +26,7 @@ export const signin = async (req: Request, res: Response) => {
 
 export const me = async (req: JWTRequest, res: Response) => {
   const pk: number = req.auth?.pk;
-  const user = await userModel.getAuthenticatedUser(pk);
+  const user = await UserModel.getAuthenticatedUser(pk);
   const { password, ...cleanUser } = user;
   return res.status(200).json(cleanUser);
 };
@@ -38,7 +35,7 @@ export const myProfile = async (req: JWTRequest, res: Response) => {
   const pk: number = req.auth?.pk;
 
   try {
-    const profile = await profileModel.getAuthenticatedProfile(pk);
+    const profile = await ProfileModel.getAuthenticatedProfile(pk);
 
     return res.status(200).json(profile);
   } catch (err) {
@@ -56,21 +53,21 @@ export const updateProfile = async (req: JWTRequest, res: Response) => {
   try {
     let cleanData;
     if (req.method === "PUT") {
-      cleanData = await profileModel.createUpdateSchema.validateAsync(
+      cleanData = await ProfileModel.createUpdateSchema.validateAsync(
         req.body,
         {
           abortEarly: false,
         }
       );
     } else {
-      cleanData = await profileModel.partialUpdateSchema.validateAsync(
+      cleanData = await ProfileModel.partialUpdateSchema.validateAsync(
         req.body,
         {
           abortEarly: false,
         }
       );
     }
-    const profile = await profileModel.update(cleanData, pk);
+    const profile = await ProfileModel.update(cleanData, pk);
 
     return res.status(200).json(profile);
   } catch (err) {

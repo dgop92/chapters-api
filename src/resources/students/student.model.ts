@@ -13,9 +13,6 @@ import {
 } from "slonik";
 import { ModelError } from "@db/customErrors";
 
-const userModel = new UserModel();
-const profileModel = new ProfileModel();
-
 // Todo improve types in update of profile-user relationship
 type Student = {
   pk: number;
@@ -68,14 +65,14 @@ export class StudentModel {
       numbers: true,
     });
 
-    const { created, user } = await userModel.getOrCreate({
+    const { created, user } = await UserModel.getOrCreate({
       username,
       password,
       email,
     });
 
     if (created) {
-      await profileModel.create(profileData, user.pk);
+      await ProfileModel.create(profileData, user.pk);
     }
     const role = await getRole(rolename);
 

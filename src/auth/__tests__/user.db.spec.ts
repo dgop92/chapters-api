@@ -16,17 +16,11 @@ const userData2 = {
 };
 
 describe("#UserModel", () => {
-  let userModel: UserModel;
-
-  before("intanciate user model", async function () {
-    userModel = new UserModel();
-  });
-
   it("should create a user", async () => {
-    const user = await userModel.create(userData1);
+    const user = await UserModel.create(userData1);
     const userExits = await db.exists(
       getExitsQuery(
-        userModel.tableName,
+        UserModel.tableName,
         getSimpleLookupQuery({ field: "pk", value: user.pk })
       )
     );
@@ -35,15 +29,15 @@ describe("#UserModel", () => {
     expect(user.email).to.be.equal(userData1.email);
   });
   it("should raise unique username", async () => {
-    await userModel.create(userData1);
-    await expect(userModel.create(userData1)).to.be.rejectedWith(
+    await UserModel.create(userData1);
+    await expect(UserModel.create(userData1)).to.be.rejectedWith(
       ModelError,
       /username/
     );
   });
   it("should raise unique email", async () => {
-    await userModel.create(userData1);
-    await expect(userModel.create(userData2)).to.be.rejectedWith(
+    await UserModel.create(userData1);
+    await expect(UserModel.create(userData2)).to.be.rejectedWith(
       ModelError,
       /email/
     );

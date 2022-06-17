@@ -15,17 +15,9 @@ const userData1 = {
 };
 
 describe("#ProfileModel", () => {
-  let profileModel: ProfileModel;
-  let userModel: UserModel;
-
-  before("set up", async function () {
-    profileModel = new ProfileModel();
-    userModel = new UserModel();
-  });
-
   it("should create a profile", async () => {
-    const user = await userModel.create(userData1);
-    const profile = await profileModel.create(profileData1, user.pk);
+    const user = await UserModel.create(userData1);
+    const profile = await ProfileModel.create(profileData1, user.pk);
 
     console.log(profile);
 
@@ -34,10 +26,10 @@ describe("#ProfileModel", () => {
     ).to.eventually.equal(true);
   });
   it("should retrieve a user's profile", async () => {
-    const user = await userModel.create(userData1);
-    const profile = await profileModel.create(profileData1, user.pk);
+    const user = await UserModel.create(userData1);
+    const profile = await ProfileModel.create(profileData1, user.pk);
 
-    const profileRetrieved = await profileModel.getAuthenticatedProfile(
+    const profileRetrieved = await ProfileModel.getAuthenticatedProfile(
       user.pk
     );
 
@@ -46,10 +38,10 @@ describe("#ProfileModel", () => {
   });
 
   it("should update user's profile", async () => {
-    const user = await userModel.create(userData1);
-    await profileModel.create(profileData1, user.pk);
+    const user = await UserModel.create(userData1);
+    await ProfileModel.create(profileData1, user.pk);
 
-    const profileUpdated = await profileModel.update(
+    const profileUpdated = await ProfileModel.update(
       { first_name: "juanitoski" },
       user.pk
     );

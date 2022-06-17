@@ -6,17 +6,14 @@ import { UserModel, User, ProfileModel } from "../auth/models";
 import { createRole } from "../resources/role/role.utilities";
 
 export async function createSuperUser(user: User) {
-  const userModel = new UserModel();
-  const profileModel = new ProfileModel();
-
   const { error, value: cleanData } = userSchema.validate(user);
 
   if (error) {
     console.log(error);
   } else {
     try {
-      const userData = await userModel.create(cleanData, true);
-      const profileData = await profileModel.create(
+      const userData = await UserModel.create(cleanData, true);
+      const profileData = await ProfileModel.create(
         {
           first_name: "admin-first-name",
           last_name: "admin-last-name",

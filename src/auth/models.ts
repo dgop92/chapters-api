@@ -23,15 +23,12 @@ export type User = {
 
 const LOGIN_ERROR = "Could not login with the provided credentials";
 
-export class UserModel {
-  tableName = "user";
-
-  integrityErrors = {
+export const UserModel = {
+  tableName: "user",
+  integrityErrors: {
     unique_username: "a user with this username already exists",
     unique_email: "a user with this email already exists",
-  };
-
-  // Expected to be created in a console
+  },
   async create(cleanData: CleanData, isAdmin = false) {
     const hashedPassword = await bcrypt.hash(cleanData.password, 8);
 
@@ -51,8 +48,7 @@ export class UserModel {
       }
       throw error;
     }
-  }
-
+  },
   async getOrCreate(cleanData: CleanData) {
     const lookupQuery = sql`WHERE username=${cleanData.username}`;
 
@@ -68,8 +64,7 @@ export class UserModel {
       }
       throw error;
     }
-  }
-
+  },
   async login(username: string, password: string) {
     const lookupQuery = sql`WHERE username=${username}`;
 
@@ -90,14 +85,13 @@ export class UserModel {
       }
       throw error;
     }
-  }
-
+  },
   async getAuthenticatedUser(pk: number) {
     const query = getDetailQuery(this.tableName, { field: "pk", value: pk });
     const res = await db.one(query);
     return res as User;
-  }
-}
+  },
+};
 
 type Profile = {
   pk: number;
@@ -108,21 +102,18 @@ type Profile = {
   user_id: number;
 };
 
-export class ProfileModel {
-  tableName = "profile";
-
-  partialUpdateSchema = Joi.object<CleanData>(profileSchemaProperties);
-  createUpdateSchema = Joi.object<CleanData>(profileSchemaProperties)
+export const ProfileModel = {
+  tableName: "profile",
+  partialUpdateSchema: Joi.object<CleanData>(profileSchemaProperties),
+  createUpdateSchema: Joi.object<CleanData>(profileSchemaProperties)
     .options({ presence: "required" })
-    .required();
-
+    .required(),
   // cleanData contains user_id
   async create(cleanData: CleanData, user_id: number) {
     const query = getInsertQuery({ ...cleanData, user_id }, this.tableName);
     const res = await db.one(query);
     return res as Profile;
-  }
-
+  },
   async getAuthenticatedProfile(user_id: number) {
     await checkResourceExists(this.tableName, {
       field: "user_id",
@@ -135,8 +126,7 @@ export class ProfileModel {
     });
     const res = await db.one(query);
     return res as Profile;
-  }
-
+  },
   async update(cleanData: CleanData, user_id: number) {
     await checkResourceExists(this.tableName, {
       field: "user_id",
@@ -149,5 +139,5 @@ export class ProfileModel {
     });
     const res = await db.one(query);
     return res as Profile;
-  }
-}
+  },
+};
