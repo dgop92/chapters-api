@@ -3,17 +3,15 @@ import { ModelError } from "@db/customErrors";
 import { Request, Response } from "express";
 import { StudentModel } from "./student.model";
 
-const studentModel = new StudentModel();
-
 export const registerStudent = async (req: Request, res: Response) => {
   try {
-    const cleanData = await studentModel.registrationSchema.validateAsync(
+    const cleanData = await StudentModel.registrationSchema.validateAsync(
       req.body,
       {
         abortEarly: false,
       }
     );
-    const student = await studentModel.create(
+    const student = await StudentModel.create(
       cleanData,
       Number(req.params.chapter_id)
     );

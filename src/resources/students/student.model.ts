@@ -38,21 +38,18 @@ const getStudentResponseQuery = (
   FROM inserted_student INNER JOIN "role" ON "role"."pk" = inserted_student.role_id;`;
 };
 
-export class StudentModel {
-  tableName = "student";
-
-  registrationSchema = Joi.object({
+export const StudentModel = {
+  tableName: "student",
+  registrationSchema: Joi.object({
     username: userSchemaPropertites.username,
     email: userSchemaPropertites.email,
     ...profileSchemaProperties,
-  });
-
-  integrityErrors = {
+  }),
+  integrityErrors: {
     unique_chapter_user: "an user cannot appear twice in a chapter",
     fg_chapter: "the chapter provided does not exit",
     fg_user: "the user provided does not exit",
-  };
-
+  },
   // cleanData contains user_id
   async create(
     cleanData: CleanData,
@@ -94,5 +91,5 @@ export class StudentModel {
       }
       throw error;
     }
-  }
-}
+  },
+};

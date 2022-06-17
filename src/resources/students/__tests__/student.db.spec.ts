@@ -24,20 +24,12 @@ const userData = {
 };
 
 describe("#StudentModel", () => {
-  let studentModel: StudentModel;
-  let chapterModel: ChapterModel;
-
-  before("set up", async function () {
-    studentModel = new StudentModel();
-    chapterModel = new ChapterModel();
-  });
-
   it("should create a student", async () => {
     await createRole("member");
-    const chapter = await chapterModel.create(chapterData);
+    const chapter = await ChapterModel.create(chapterData);
     const chapter_id = chapter.pk;
 
-    const student = await studentModel.create(
+    const student = await StudentModel.create(
       { ...userData, ...profileData },
       chapter_id
     );
