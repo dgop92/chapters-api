@@ -23,7 +23,7 @@ export function handleUnauthorizedError(
 ) {
   if (err.name === "UnauthorizedError") {
     const authError = new AuthError(
-      "Authentication credentials were not provided"
+      "Authentication credentials are invalid or missing"
     );
     res.status(401).send(authError.details);
   } else {

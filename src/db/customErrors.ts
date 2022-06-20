@@ -33,7 +33,7 @@ export class ModelError extends Error {
 
 export class ResourceNotFoundError extends Error {
   constructor(modelName: string) {
-    super(`${modelName} was not found`);
+    super(`${modelName} not found`);
   }
 
   get details() {

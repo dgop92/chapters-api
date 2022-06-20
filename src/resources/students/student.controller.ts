@@ -1,26 +1,16 @@
-import { ValidationError } from "joi";
-import { ModelError } from "@db/customErrors";
+import { catchErrors } from "common/middlewares";
 import { Request, Response } from "express";
 import { StudentModel } from "./student.model";
 
-export const registerStudent = async (req: Request, res: Response) => {
-  try {
+export const registerStudent = catchErrors(
+  async (req: Request, res: Response) => {
     const cleanData = await StudentModel.registrationSchema.validateAsync(
-      req.body,
-      {
-        abortEarly: false,
-      }
+      req.body
     );
     const student = await StudentModel.create(
       cleanData,
       Number(req.params.chapter_id)
     );
     return res.status(200).json(student);
-  } catch (error) {
-    if (error instanceof ModelError || error instanceof ValidationError) {
-      return res.status(400).json(error.details);
-    } else {
-      throw error;
-    }
   }
-};
+);

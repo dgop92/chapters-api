@@ -6,6 +6,7 @@ import { authRouter, usersRouter } from "./auth/routes";
 import chapterRouter from "./resources/chapters/chapter.routes";
 import studentRouter from "./resources/students/student.routes";
 import { handleUnauthorizedError } from "./auth/customErrors";
+import { handleCommonErrors } from "common/middlewares";
 
 // import cors from 'cors'
 
@@ -26,6 +27,7 @@ app.use("/api/users", usersRouter);
 app.use("/api/chapter", chapterRouter);
 app.use("/api/students", studentRouter);
 app.use(handleUnauthorizedError);
+app.use(handleCommonErrors);
 
 export const start = async () => {
   try {

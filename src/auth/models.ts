@@ -24,7 +24,7 @@ type Profile = {
 
 export const ProfileModel = {
   tableName: "profile",
-  partialUpdateSchema: Joi.object<CleanData>(profileSchemaProperties),
+  partialUpdateSchema: Joi.object<CleanData>(profileSchemaProperties).min(1),
   createUpdateSchema: Joi.object<CleanData>(profileSchemaProperties)
     .options({ presence: "required" })
     .required(),
