@@ -1,17 +1,21 @@
 import { ModelError } from "@db/customErrors";
 import { disconnect } from "@db/db";
+import { CleanData } from "@db/types";
 import { userSchema } from "auth/schemas";
+import { ChapterModel } from "resources/chapters/chapter.model";
+import { StudentModel } from "resources/students/student.model";
 import { UniqueIntegrityConstraintViolationError } from "slonik";
-import { UserModel, User, ProfileModel } from "../auth/models";
+import { UserModel, ProfileModel } from "../auth/models";
 import { createRole } from "../resources/role/role.utilities";
 
-export async function createSuperUser(user: User) {
+export async function createSuperUser(user: CleanData) {
   const { error, value: cleanData } = userSchema.validate(user);
 
   if (error) {
     console.log(error);
   } else {
     try {
+      // TODO: user and profile must be a transaction, or use a db trigger
       const userData = await UserModel.create(cleanData, true);
       const profileData = await ProfileModel.create(
         {
@@ -53,4 +57,44 @@ export async function createBasicRoles() {
   await createRoleUtil("executive");
   console.log("Roles created successfully");
   disconnect();
+}
+
+export async function createChapter(chapterData: CleanData) {
+  try {
+    const cleanData = await ChapterModel.createUpdateSchema.validateAsync(
+      chapterData
+    );
+    const chapter = await ChapterModel.create(cleanData);
+    console.log(chapter);
+    disconnect();
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function createExecutiveStudent(
+  studentData: CleanData,
+  chapter_id: number
+) {
+  try {
+    const exetendedCleanData = {
+      ...studentData,
+      first_name: "template_first_name",
+      last_name: "template_last_name",
+      student_code: "your_code",
+      career: "student_career",
+    };
+    const cleanData = await StudentModel.registrationSchema.validateAsync(
+      exetendedCleanData
+    );
+    const student = await StudentModel.create(
+      cleanData,
+      chapter_id,
+      "executive"
+    );
+    console.log(student);
+    disconnect();
+  } catch (error) {
+    console.log(error);
+  }
 }
