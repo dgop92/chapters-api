@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { loginSchema } from "./schemas";
 import { ProfileModel, UserModel } from "./models";
 import { AuthError } from "./customErrors";
-import { getJwtToken } from "./jwtUtils";
+import { getJwtToken, AuthPayload } from "./jwtUtils";
 import { Request as JWTRequest } from "express-jwt";
 import { ValidationError } from "joi";
 import { ResourceNotFoundError } from "@db/customErrors";
@@ -24,31 +24,27 @@ export const signin = async (req: Request, res: Response) => {
   }
 };
 
-export const me = async (req: JWTRequest, res: Response) => {
-  const pk: number = req.auth?.pk;
-  const user = await UserModel.getAuthenticatedUser(pk);
-  const { password, ...cleanUser } = user;
-  return res.status(200).json(cleanUser);
+export const me = async (req: JWTRequest<AuthPayload>, res: Response) => {
+  const { pk, is_admin, username, email } = req.auth!;
+  return res.status(200).json({ pk, is_admin, username, email });
 };
 
-export const myProfile = async (req: JWTRequest, res: Response) => {
-  const pk: number = req.auth?.pk;
+export const myProfile = async (
+  req: JWTRequest<AuthPayload>,
+  res: Response
+) => {
+  const { pk } = req.auth!;
 
-  try {
-    const profile = await ProfileModel.getAuthenticatedProfile(pk);
-
-    return res.status(200).json(profile);
-  } catch (err) {
-    // For admin users only
-    if (err instanceof ResourceNotFoundError) {
-      return res.status(404).json(err.details);
-    }
-  }
+  const profile = await ProfileModel.getAuthenticatedProfile(pk);
+  return res.status(200).json(profile);
 };
 
 // Called from PUT or PATCH
-export const updateProfile = async (req: JWTRequest, res: Response) => {
-  const pk: number = req.auth?.pk;
+export const updateProfile = async (
+  req: JWTRequest<AuthPayload>,
+  res: Response
+) => {
+  const { pk } = req.auth!;
 
   try {
     let cleanData;

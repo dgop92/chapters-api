@@ -13,6 +13,56 @@ import { checkResourceExists } from "@db/genericOperations";
 import Joi from "joi";
 import { profileSchemaProperties } from "./schemas";
 
+type Profile = {
+  pk: number;
+  first_name: string;
+  last_name: string;
+  student_code: string;
+  career: string;
+  user_id: number;
+};
+
+export const ProfileModel = {
+  tableName: "profile",
+  partialUpdateSchema: Joi.object<CleanData>(profileSchemaProperties),
+  createUpdateSchema: Joi.object<CleanData>(profileSchemaProperties)
+    .options({ presence: "required" })
+    .required(),
+  // cleanData contains user_id
+  async create(cleanData: CleanData, user_id: number) {
+    const query = getInsertQuery({ ...cleanData, user_id }, this.tableName);
+    const res = await db.one(query);
+    return res as Profile;
+  },
+  async getAuthenticatedProfile(user_id: number) {
+    // profile must exits unless you touch the db
+    await checkResourceExists(this.tableName, {
+      field: "user_id",
+      value: user_id,
+    });
+
+    const query = getDetailQuery(this.tableName, {
+      field: "user_id",
+      value: user_id,
+    });
+    const res = await db.one(query);
+    return res as Profile;
+  },
+  async update(cleanData: CleanData, user_id: number) {
+    await checkResourceExists(this.tableName, {
+      field: "user_id",
+      value: user_id,
+    });
+
+    const query = getUpdateQuery(cleanData, this.tableName, {
+      field: "user_id",
+      value: user_id,
+    });
+    const res = await db.one(query);
+    return res as Profile;
+  },
+};
+
 export type User = {
   pk: number;
   username: string;
@@ -39,9 +89,21 @@ export const UserModel = {
     };
 
     try {
-      const query = getInsertQuery(newData, this.tableName);
-      const res = await db.query(query);
-      return res.rows[0] as User;
+      const user = await db.transaction(async (transactionConnection) => {
+        const userQuery = getInsertQuery(newData, this.tableName);
+        const userResponse = (await transactionConnection.one(
+          userQuery
+        )) as User;
+
+        const profileQuery = getInsertQuery(
+          { user_id: userResponse.pk },
+          ProfileModel.tableName
+        );
+        await transactionConnection.one(profileQuery);
+
+        return userResponse;
+      });
+      return user;
     } catch (error) {
       if (error instanceof IntegrityConstraintViolationError) {
         throw new ModelError(this.integrityErrors, error);
@@ -90,54 +152,5 @@ export const UserModel = {
     const query = getDetailQuery(this.tableName, { field: "pk", value: pk });
     const res = await db.one(query);
     return res as User;
-  },
-};
-
-type Profile = {
-  pk: number;
-  first_name: string;
-  last_name: string;
-  student_code: string;
-  career: string;
-  user_id: number;
-};
-
-export const ProfileModel = {
-  tableName: "profile",
-  partialUpdateSchema: Joi.object<CleanData>(profileSchemaProperties),
-  createUpdateSchema: Joi.object<CleanData>(profileSchemaProperties)
-    .options({ presence: "required" })
-    .required(),
-  // cleanData contains user_id
-  async create(cleanData: CleanData, user_id: number) {
-    const query = getInsertQuery({ ...cleanData, user_id }, this.tableName);
-    const res = await db.one(query);
-    return res as Profile;
-  },
-  async getAuthenticatedProfile(user_id: number) {
-    await checkResourceExists(this.tableName, {
-      field: "user_id",
-      value: user_id,
-    });
-
-    const query = getDetailQuery(this.tableName, {
-      field: "user_id",
-      value: user_id,
-    });
-    const res = await db.one(query);
-    return res as Profile;
-  },
-  async update(cleanData: CleanData, user_id: number) {
-    await checkResourceExists(this.tableName, {
-      field: "user_id",
-      value: user_id,
-    });
-
-    const query = getUpdateQuery(cleanData, this.tableName, {
-      field: "user_id",
-      value: user_id,
-    });
-    const res = await db.one(query);
-    return res as Profile;
   },
 };

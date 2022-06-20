@@ -5,7 +5,7 @@ import { userSchema } from "auth/schemas";
 import { ChapterModel } from "resources/chapters/chapter.model";
 import { StudentModel } from "resources/students/student.model";
 import { UniqueIntegrityConstraintViolationError } from "slonik";
-import { UserModel, ProfileModel } from "../auth/models";
+import { UserModel } from "../auth/models";
 import { createRole } from "../resources/role/role.utilities";
 
 export async function createSuperUser(user: CleanData) {
@@ -15,21 +15,10 @@ export async function createSuperUser(user: CleanData) {
     console.log(error);
   } else {
     try {
-      // TODO: user and profile must be a transaction, or use a db trigger
       const userData = await UserModel.create(cleanData, true);
-      const profileData = await ProfileModel.create(
-        {
-          first_name: "admin-first-name",
-          last_name: "admin-last-name",
-          career: "admin-career-name",
-          student_code: "admin-code",
-        },
-        userData.pk
-      );
       disconnect();
       console.log("Succesfully created user with the following data: ");
       console.log(userData);
-      console.log(profileData);
     } catch (error) {
       if (error instanceof ModelError) {
         console.log(error.details);

@@ -1,8 +1,7 @@
-import Joi from "joi";
 import db from "@db/db";
 import { CleanData } from "@db/types";
 import { ProfileModel, UserModel } from "auth/models";
-import { profileSchemaProperties, userSchemaPropertites } from "auth/schemas";
+import { userSchemaPropertites } from "auth/schemas";
 import { generate } from "generate-password";
 import { getRole } from "../role/role.utilities";
 import { getInsertQuery } from "@db/crudQueries";
@@ -23,6 +22,7 @@ type Student = {
   activities: number;
 };
 
+// TODO: avoid hardcode values
 const getStudentResponseQuery = (
   actionQuery: TaggedTemplateLiteralInvocation
 ) => {
@@ -40,10 +40,9 @@ const getStudentResponseQuery = (
 
 export const StudentModel = {
   tableName: "student",
-  registrationSchema: Joi.object({
+  registrationSchema: ProfileModel.createUpdateSchema.keys({
     username: userSchemaPropertites.username,
     email: userSchemaPropertites.email,
-    ...profileSchemaProperties,
   }),
   integrityErrors: {
     unique_chapter_user: "an user cannot appear twice in a chapter",
@@ -69,7 +68,7 @@ export const StudentModel = {
     });
 
     if (created) {
-      await ProfileModel.create(profileData, user.pk);
+      await ProfileModel.update(profileData, user.pk);
     }
     const role = await getRole(rolename);
 

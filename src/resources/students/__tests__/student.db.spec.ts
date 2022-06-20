@@ -43,4 +43,25 @@ describe("#StudentModel", () => {
       checkResourceExists("user", { field: "pk", value: student.user_id })
     ).to.eventually.equal(true);
   });
+  it("should be a valid registration schema", async () => {
+    const { error } = StudentModel.registrationSchema.validate({
+      ...userData,
+      ...profileData,
+    });
+    expect(error).to.be.equal(undefined);
+  });
+  it("should throw an error for no profile in registration schema", async () => {
+    const { error } = StudentModel.registrationSchema.validate({
+      ...userData,
+    });
+    expect(error).to.not.be.equal(undefined);
+  });
+  it("should throw an error for invalid user data in registration schema", async () => {
+    const { error } = StudentModel.registrationSchema.validate({
+      username: "j",
+      email: "j",
+      ...profileData,
+    });
+    expect(error).to.not.be.equal(undefined);
+  });
 });
