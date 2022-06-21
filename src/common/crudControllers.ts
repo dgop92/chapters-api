@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { CrudModel } from "@db/types";
+import { CleanData, CrudModel } from "@db/types";
 import { catchErrors } from "./middlewares";
 
 export const createOne = <ModelType>(model: CrudModel<ModelType>) =>
@@ -12,7 +12,12 @@ export const createOne = <ModelType>(model: CrudModel<ModelType>) =>
 
 export const updateOne = <ModelType>(model: CrudModel<ModelType>) =>
   catchErrors(async (req: Request, res: Response) => {
-    const cleanData = await model.createUpdateSchema.validateAsync(req.body);
+    let cleanData: CleanData;
+    if (req.method === "PUT") {
+      cleanData = await model.createUpdateSchema.validateAsync(req.body);
+    } else {
+      cleanData = await model.partialUpdateSchema.validateAsync(req.body);
+    }
     const modelData = await model.update(cleanData, Number(req.params.id));
     return res.status(200).json(modelData);
   });

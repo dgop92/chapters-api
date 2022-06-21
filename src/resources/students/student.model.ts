@@ -7,17 +7,18 @@ import { getRole } from "../role/role.utilities";
 import { getInsertQuery } from "@db/crudQueries";
 import {
   IntegrityConstraintViolationError,
+  NotFoundError,
   sql,
   TaggedTemplateLiteralInvocation,
 } from "slonik";
-import { ModelError } from "@db/customErrors";
+import { ModelError, ResourceNotFoundError } from "@db/customErrors";
 
 // Todo improve types in update of profile-user relationship
 type Student = {
   pk: number;
   chapter_id: number;
   user_id: number;
-  role_name: string;
+  rolename: string;
   status: boolean;
   activities: number;
 };
@@ -89,6 +90,24 @@ export const StudentModel = {
         throw new ModelError(this.integrityErrors, error);
       }
       throw error;
+    }
+  },
+
+  async getChapterStudent(user_id: number, chapter_id: number) {
+    const baseQuery = sql`SELECT "student"."pk", "chapter_id", "user_id", "status", "activities", "role"."rolename" FROM "student"`;
+    const joinQuery = sql`INNER JOIN "role" ON "role".pk = "role_id"`;
+    const lookupQuery = sql`WHERE "user_id" = ${user_id} AND "chapter_id" = ${chapter_id};`;
+    const query = sql`${baseQuery} ${joinQuery} ${lookupQuery}`;
+
+    try {
+      const res = await db.one(query);
+      return res as Student;
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw new ResourceNotFoundError(this.tableName);
+      } else {
+        throw error;
+      }
     }
   },
 };

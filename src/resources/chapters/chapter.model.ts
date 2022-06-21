@@ -30,7 +30,7 @@ export const ChapterModel = {
     faculty,
     departament,
     career,
-  }),
+  }).min(1),
   crudQueries: getCrudQueries("chapter", "pk"),
   async create(cleanData: CleanData): Promise<Chapter> {
     const query = this.crudQueries.createOneQuery(cleanData);

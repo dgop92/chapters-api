@@ -1,8 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 
 export class AuthError extends Error {
-  constructor(message: string) {
+  isPermissionError: boolean;
+
+  constructor(message: string, isPermError = false) {
     super(message);
+    this.isPermissionError = isPermError;
   }
 
   get details() {
@@ -25,8 +28,11 @@ export function handleUnauthorizedError(
     const authError = new AuthError(
       "Authentication credentials are invalid or missing"
     );
-    res.status(401).send(authError.details);
-  } else {
-    next(err);
+    return res.status(401).send(authError.details);
   }
+  if (err instanceof AuthError) {
+    const statusCode = err.isPermissionError ? 403 : 401;
+    return res.status(statusCode).send(err.details);
+  }
+  next(err);
 }

@@ -2,6 +2,10 @@ import Joi from "joi";
 import { NextFunction, Request, Response, RequestHandler } from "express";
 import { ValidationError } from "joi";
 import { ModelError, ResourceNotFoundError } from "@db/customErrors";
+import { AuthPayload } from "../auth/jwtUtils";
+import { Request as JWTRequest } from "express-jwt";
+import { AuthError } from "../auth/customErrors";
+import { StudentModel } from "resources/students/student.model";
 
 const simpleDetailSchema = Joi.object({
   id: Joi.number().integer().positive().required(),
@@ -59,4 +63,36 @@ export function handleCommonErrors(
     return res.status(404).json(err.details);
   }
   return res.status(500).json({ message: "Internal Server Error" });
+}
+
+export async function isAdminOrChapterExecutive(
+  req: JWTRequest<AuthPayload>,
+  res: Response,
+  next: NextFunction
+) {
+  const { pk: user_id, is_admin } = req.auth!;
+  const chapter_id = Number(req.params.id);
+  if (is_admin) {
+    next();
+  } else {
+    const authError = new AuthError(
+      "You do not have permission to make this action",
+      true
+    );
+
+    try {
+      const student = await StudentModel.getChapterStudent(user_id, chapter_id);
+      if (student.rolename === "executive") {
+        next();
+      } else {
+        next(authError);
+      }
+    } catch (error) {
+      if (error instanceof ResourceNotFoundError) {
+        next(authError);
+      } else {
+        throw error;
+      }
+    }
+  }
 }

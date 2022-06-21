@@ -64,4 +64,19 @@ describe("#StudentModel", () => {
     });
     expect(error).to.not.be.equal(undefined);
   });
+  it("should retrieve the chapter student", async () => {
+    await createRole("member");
+    const chapter = await ChapterModel.create(chapterData);
+    const chapter_id = chapter.pk;
+
+    const student = await StudentModel.create(
+      { ...userData, ...profileData },
+      chapter_id
+    );
+    const retrievedStudent = await StudentModel.getChapterStudent(
+      student.user_id,
+      chapter_id
+    );
+    expect(student).to.be.eql(retrievedStudent);
+  });
 });
