@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import { UnauthorizedError } from "express-jwt";
 
 export class AuthError extends Error {
   isPermissionError: boolean;
@@ -19,15 +20,13 @@ export class AuthError extends Error {
 }
 
 export function handleUnauthorizedError(
-  err: { name: string },
+  err: unknown,
   req: Request,
   res: Response,
   next: NextFunction
 ) {
-  if (err.name === "UnauthorizedError") {
-    const authError = new AuthError(
-      "Authentication credentials are invalid or missing"
-    );
+  if (err instanceof UnauthorizedError) {
+    const authError = new AuthError(err.message);
     return res.status(401).send(authError.details);
   }
   if (err instanceof AuthError) {

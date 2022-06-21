@@ -79,4 +79,30 @@ describe("#StudentModel", () => {
     );
     expect(student).to.be.eql(retrievedStudent);
   });
+  it("should retrieve the user's students", async () => {
+    await createRole("member");
+    const chapter1 = await ChapterModel.create(chapterData);
+    const chapter2 = await ChapterModel.create({
+      ...chapterData,
+      name: "AnotherGroup",
+    });
+
+    const chapter_id1 = chapter1.pk;
+    const chapter_id2 = chapter2.pk;
+
+    const student1 = await StudentModel.create(
+      { ...userData, ...profileData },
+      chapter_id1
+    );
+    await StudentModel.create({ ...userData, ...profileData }, chapter_id2);
+
+    const studentItems = await StudentModel.getChapters({
+      user_id: student1.user_id,
+    });
+
+    console.log(studentItems);
+    expect(studentItems.length).to.be.equal(2);
+    const chapterNames = studentItems.map((s) => s.name);
+    expect(chapterNames).to.have.members([chapterData.name, "AnotherGroup"]);
+  });
 });

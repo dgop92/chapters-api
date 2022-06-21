@@ -33,6 +33,16 @@ export const singleParamValidation =
     return next();
   };
 
+export const queryParamValidation =
+  (paramSchema: Joi.ObjectSchema) =>
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { error } = paramSchema.validate(req.query);
+    if (error) {
+      return res.status(400).json({ detail: error.details[0] });
+    }
+    return next();
+  };
+
 // Copy from https://github.com/oldboyxx/jira_clone/blob/26a9e77b1789fef9cb43edb5d6018cf1663cf035/api/src/errors/asyncCatch.ts#L3
 export const catchErrors = (requestHandler: RequestHandler): RequestHandler => {
   return async (req, res, next): Promise<any> => {
@@ -62,6 +72,7 @@ export function handleCommonErrors(
   if (err instanceof ResourceNotFoundError) {
     return res.status(404).json(err.details);
   }
+  console.log(err);
   return res.status(500).json({ message: "Internal Server Error" });
 }
 

@@ -23,6 +23,19 @@ type Student = {
   activities: number;
 };
 
+type StudentItem = {
+  pk: number;
+  name: number;
+  status: boolean;
+  activities: number;
+  rolename: string;
+};
+
+interface ChapterQuery {
+  user_id?: number;
+  chapter_id?: number;
+}
+
 // TODO: avoid hardcode values
 const getStudentResponseQuery = (
   actionQuery: TaggedTemplateLiteralInvocation
@@ -109,5 +122,31 @@ export const StudentModel = {
         throw error;
       }
     }
+  },
+
+  async getChapters({ user_id, chapter_id }: ChapterQuery) {
+    const baseQuery = sql`SELECT "student"."pk", "chapter"."name", "status", "activities", "role"."rolename" FROM "student"`;
+
+    const joinQuery1 = sql`INNER JOIN "role" ON "role".pk = "role_id"`;
+    const joinQuery2 = sql`INNER JOIN "chapter" ON "chapter".pk = "chapter_id"`;
+
+    const conditions = [];
+    if (user_id) {
+      conditions.push(sql`"user_id" = ${user_id}`);
+    }
+    if (chapter_id) {
+      conditions.push(sql`"chapter_id" = ${chapter_id}`);
+    }
+
+    let query;
+    if (conditions.length > 0) {
+      const lookupQuery = sql`WHERE ${sql.join(conditions, sql` AND `)}`;
+      query = sql`${baseQuery} ${joinQuery1} ${joinQuery2} ${lookupQuery}`;
+    } else {
+      query = sql`${baseQuery} ${joinQuery1} ${joinQuery2}`;
+    }
+
+    const res = await db.query(query);
+    return res.rows as StudentItem[];
   },
 };

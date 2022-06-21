@@ -1,13 +1,32 @@
-import { singleParamValidation } from "common/middlewares";
+import { protectedEndpoint } from "auth/middlewares";
+import {
+  queryParamValidation,
+  singleParamValidation,
+} from "common/middlewares";
 import { Router } from "express";
 import Joi from "joi";
-import { registerStudent } from "./student.controller";
+import { getMany, registerStudent, userStudents } from "./student.controller";
+
+const getManyQuerySchema = Joi.object({
+  user_id: Joi.number().integer().positive(),
+  chapter_id: Joi.number().integer().positive(),
+});
 
 const router = Router();
 
 const simpleDetailSchema = Joi.object({
   chapter_id: Joi.number().integer().positive().required(),
 });
+
+router
+  .route("/")
+  .get([
+    protectedEndpoint(),
+    queryParamValidation(getManyQuerySchema),
+    getMany,
+  ]);
+
+router.route("/own").get([protectedEndpoint(), userStudents]);
 
 // may in the future add reset password, change password
 router

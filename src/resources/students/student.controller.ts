@@ -1,6 +1,8 @@
 import { catchErrors } from "common/middlewares";
 import { Request, Response } from "express";
 import { StudentModel } from "./student.model";
+import { AuthPayload } from "auth/jwtUtils";
+import { Request as JWTRequest } from "express-jwt";
 
 export const registerStudent = catchErrors(
   async (req: Request, res: Response) => {
@@ -11,6 +13,18 @@ export const registerStudent = catchErrors(
       cleanData,
       Number(req.params.chapter_id)
     );
-    return res.status(200).json(student);
+    return res.status(201).json(student);
+  }
+);
+
+export const getMany = catchErrors(async (req: Request, res: Response) => {
+  const results = await StudentModel.getChapters(req.query);
+  return res.status(200).json(results);
+});
+
+export const userStudents = catchErrors(
+  async (req: JWTRequest<AuthPayload>, res: Response) => {
+    const results = await StudentModel.getChapters({ user_id: req.auth?.pk });
+    return res.status(200).json(results);
   }
 );
