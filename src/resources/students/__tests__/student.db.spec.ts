@@ -23,6 +23,11 @@ const userData = {
   email: "example@gmail.com",
 };
 
+const userData2 = {
+  username: "real_username_2",
+  email: "example_2@gmail.com",
+};
+
 describe("#StudentModel", () => {
   it("should create a student", async () => {
     await createRole("member");
@@ -104,5 +109,18 @@ describe("#StudentModel", () => {
     expect(studentItems.length).to.be.equal(2);
     const chapterNames = studentItems.map((s) => s.name);
     expect(chapterNames).to.have.members([chapterData.name, "AnotherGroup"]);
+  });
+  it("should update students activities", async () => {
+    await createRole("member");
+    const chapter = await ChapterModel.create(chapterData);
+    await StudentModel.create({ ...userData, ...profileData }, chapter.pk);
+    await StudentModel.create({ ...userData2, ...profileData }, chapter.pk);
+
+    const result = await StudentModel.updateActivity(
+      [userData.username, userData2.username],
+      chapter.pk
+    );
+
+    expect(result.rowCount).to.be.equal(2);
   });
 });

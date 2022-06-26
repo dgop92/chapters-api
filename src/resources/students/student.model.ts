@@ -12,6 +12,7 @@ import {
   TaggedTemplateLiteralInvocation,
 } from "slonik";
 import { ModelError, ResourceNotFoundError } from "@db/customErrors";
+import Joi from "joi";
 
 // Todo improve types in update of profile-user relationship
 type Student = {
@@ -148,5 +149,22 @@ export const StudentModel = {
 
     const res = await db.query(query);
     return res.rows as StudentItem[];
+  },
+  updateActivitySchema: Joi.object({
+    usernames: Joi.array().items(userSchemaPropertites.username).required(),
+  }),
+  async updateActivity(usernames: string[], chapter_id: number) {
+    const baseUpdateQuery = sql`UPDATE "student" SET "activities" = "activities" + 1`;
+    const joinQuery = sql`FROM "user" WHERE "user"."pk" = "student"."user_id"`;
+    // TODO: replace using sql.array
+    const usernamesQuery = sql`AND "user"."username" in (${sql.join(
+      usernames,
+      sql`,`
+    )})`;
+    const chapterConditionQuery = sql`AND "chapter_id" = ${chapter_id}`;
+
+    const query = sql`${baseUpdateQuery} ${joinQuery} ${usernamesQuery} ${chapterConditionQuery}`;
+    const res = await db.query(query);
+    return res;
   },
 };

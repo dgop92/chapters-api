@@ -28,3 +28,16 @@ export const userStudents = catchErrors(
     return res.status(200).json(results);
   }
 );
+
+export const activitiesBatchUpdate = catchErrors(
+  async (req: Request, res: Response) => {
+    const chapter_id = Number(req.params.id);
+    const { usernames } = await StudentModel.updateActivitySchema.validateAsync(
+      req.body
+    );
+    console.log(chapter_id, usernames);
+    const result = await StudentModel.updateActivity(usernames, chapter_id);
+
+    return res.status(200).json({ studentsUpdated: result.rowCount });
+  }
+);

@@ -1,11 +1,18 @@
 import { protectedEndpoint } from "auth/middlewares";
 import {
+  isAdminOrChapterExecutive,
   queryParamValidation,
   singleParamValidation,
+  validateLookUpField,
 } from "common/middlewares";
 import { Router } from "express";
 import Joi from "joi";
-import { getMany, registerStudent, userStudents } from "./student.controller";
+import {
+  activitiesBatchUpdate,
+  getMany,
+  registerStudent,
+  userStudents,
+} from "./student.controller";
 
 const getManyQuerySchema = Joi.object({
   user_id: Joi.number().integer().positive(),
@@ -27,6 +34,14 @@ router
   ]);
 
 router.route("/own").get([protectedEndpoint(), userStudents]);
+router
+  .route("/activities/:id")
+  .put([
+    validateLookUpField,
+    protectedEndpoint(),
+    isAdminOrChapterExecutive,
+    activitiesBatchUpdate,
+  ]);
 
 // may in the future add reset password, change password
 router
